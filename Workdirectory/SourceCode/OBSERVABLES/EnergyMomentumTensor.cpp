@@ -110,8 +110,12 @@ namespace Observables {
 			std::string OutputFile=StringManipulation::StringCast(IO::OutputDirectory,fname,"ID",RandomNumberGenerator::MySEED,".txt");
 			
 			OutStream.open(OutputFile.c_str());
+
+			// Refresh the boundary planes once before the parallel profile reads.
+			UOld->SynchronizeGhostCells();
+			U->SynchronizeGhostCells();
 						
-			//UPDATE ALL GAUGE LINKS
+			//AVERAGE THE EMT OVER EACH TRANSVERSE PLANE
 			for(INT z=zLow;z<=zHigh;z++){
 				//DIAGONAL COMPONENTS OF THE ENERGY MOMENTUM TENSOR
 				DOUBLE T00=0.0,TXX=0.0,TYY=0.0,TZZ=0.0;
@@ -132,10 +136,6 @@ namespace Observables {
 				for(INT y=yLow;y<=yHigh;y++){
 					for(INT x=xLow;x<=xHigh;x++){
 						
-						//COMPUTE AVERAGE FIELD STRENGTH
-						SUNcGaugeLinks::UOld->SynchronizeGhostCells();
-						SUNcGaugeLinks::U->SynchronizeGhostCells();
-
 						//CALCULATES E'S AND B'S FOR SLICE t+dt/2
 						COMPUTE_AVG_FIELD_STRENGTH(x,y,z,UOld);
 

@@ -1,6 +1,6 @@
 # Roihu comparison and seed 1 handoff
 
-Updated 5 November 2026. The historical build comparison is complete. The production-grid fork run through `t=88` and its comparison with Grid B are deferred.
+Historical comparison record from 5 November 2026. The follow-up uses the optimized EMT writer for a matched production-grid triple and its comparison with Grid B. [Production lattice plan](plan-production-seed1.md)
 
 A fresh build of `a9e81dc` served as the historical reference. The original Roihu output is unavailable. The seed-0 `timetest008Coll` and `timetest008Coll2` archives first appeared at `853d302` and provide a separate check at the historical transverse resolution.
 
@@ -53,11 +53,11 @@ The production-grid check covers initialization and early evolution before nomin
 
 The local, Git-ignored record is `runs/roihu-pair-sn3lhjkk/`. It contains `differences.csv`, `pilot-telemetry.tsv` and a `reference/` and `fork/` directory with `manifest.json`, `resource-usage.txt`, logs and raw outputs. The manifests preserve the exact commands, source revisions, compiler, binary hashes and linked libraries.
 
-### Deferred fork run through `t=88`
+### Pre-optimization collision recipe through `t=88`
 
-When scheduled, run one seed-1 production-grid collision with the fork pinned to `04bd349b12a0661995a7696a00e8685d5f157e7a`. Its `SourceCode` tree matches the completed Grid B run at `2feb0d629954280be377836d9d1359ce0c2e276e`. Use the collision-study build with both nucleus multipliers set to 1, source amplitude 0.125, `σ_z/a_z=16`, `m=0.125` and `Λ=0.625`.
+The original collision-only recipe pins the fork to `04bd349b12a0661995a7696a00e8685d5f157e7a`. Its `SourceCode` tree matches the completed Grid B run at `2feb0d629954280be377836d9d1359ce0c2e276e`. It uses the collision-study build with both nucleus multipliers set to 1, source amplitude 0.125, `σ_z/a_z=16`, `m=0.125` and `Λ=0.625`.
 
-Budget roughly 22 hours for one solver, based on initialization plus 110 blocks of 100 steps and an EMT profile. Allow margin for periodic diagnostics. In Ubuntu, check `free -h` for headroom above the measured 15.79 GiB peak. The pilot's preflight required 19 GiB available.
+The pre-optimization estimate was roughly 22 hours for one solver, based on initialization plus 110 blocks of 100 steps and an EMT profile. The optimized timing is recorded with the new campaign. [EMT performance pilot](plan-production-seed1.md#performance-pilot)
 
 From `Workdirectory` in Ubuntu, use Bash, Git, tar, g++ with OpenMP, GSL, FFTW and GNU time. This recipe builds the pinned source and records the commands, toolchain and outputs in a fresh run directory.
 
@@ -105,4 +105,4 @@ Compare the fork runs in simulation units. Convert the bulk site sum to integrat
 
 Report absolute differences alongside relative RMS on the aligned grid. The same seed labels different transverse charge realizations on the two meshes, and both transverse and longitudinal spacings change. Treat the result as a comparison of these two events that combines mesh and realization effects.
 
-The first pass covers full collision profiles. A later comparison of collision-minus-isolated-nuclei observables requires matching left-only and right-only controls on the production grid with the same collision procedure and nucleus multipliers as the Grid B controls.
+The production campaign extends this collision comparison to the collision-minus-controls observable using left-only and right-only runs on each lattice. [Cross-grid comparison plan](plan-production-seed1.md#compare-the-two-lattices)
