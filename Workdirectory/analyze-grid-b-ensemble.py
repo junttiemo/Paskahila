@@ -46,6 +46,11 @@ def write_csv(path, columns, rows):
         writer.writerows(rows)
 
 
+def read_emt_profile(path):
+    t00, txx, tyy, tzz, t0z = np.loadtxt(path, usecols=(1, 2, 3, 4, 7), unpack=True)
+    return np.column_stack((t00, t0z, (txx + tyy) / 2, tzz))
+
+
 def write_profile_csv(path, columns, coordinate_format, chunks):
     fmt = coordinate_format + (VALUE_FORMAT,) * (len(columns) - len(coordinate_format))
     with path.open("w", encoding="utf-8", newline="") as stream:
@@ -84,8 +89,7 @@ def load_campaign(queue, completed, output):
         fields = raw[STEPS.index(dt), int(seed) - 1, MODES.index(mode)]
         for frame, time in enumerate(REPORTED):
             profile = run / f"EMTDynT{time:g}ID{seed}.txt"
-            t00, txx, tyy, tzz, t0z = np.loadtxt(profile, usecols=(1, 2, 3, 4, 7), unpack=True)
-            fields[frame] = np.column_stack((t00, t0z, (txx + tyy) / 2, tzz))
+            fields[frame] = read_emt_profile(profile)
             physical = f"{time + float(dt) / 2:.3f}" if frame else ""
             if frame == 0:
                 alignment = "initial_mixed_time"

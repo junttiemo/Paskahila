@@ -81,11 +81,38 @@ def read_numeric_rows(path, width, initial_width=None):
     return rows
 
 
-def check_z_rows(path, width):
+def check_z_rows(path, width, nz=512):
     rows = read_numeric_rows(path, width)
-    if len(rows) != 512 or any(row[0] != index for index, row in enumerate(rows)):
-        raise ValueError(f"{path.name} must contain z indices 0 through 511 in order")
+    if len(rows) != nz or any(row[0] != index for index, row in enumerate(rows)):
+        raise ValueError(f"{path.name} must contain z indices 0 through {nz - 1} in order")
     return rows
+
+
+def validate_diagnostics(run_dir, seed, dt, nominal_steps, profile_steps, nz):
+    profile_names = [f"EMTDynT{frame * 8 / 10:g}ID{seed}.txt"
+                     for frame in range(nominal_steps // profile_steps + 1)]
+    if {path.name for path in run_dir.glob("EMTDynT*")} != set(profile_names):
+        raise ValueError(f"expected {len(profile_names)} EMT profiles at 0.8-unit intervals")
+    initial = check_z_rows(run_dir / profile_names[0], 14, nz)
+    for name in profile_names[1:]:
+        check_z_rows(run_dir / name, 14, nz)
+    check_z_rows(run_dir / f"GVDynT0ID{seed}.txt", 2, nz)
+
+    gauss = read_numeric_rows(run_dir / f"GausCheck{seed}.txt", 3)
+    energy = read_numeric_rows(run_dir / f"EnergyID{seed}.txt", 4, initial_width=6)
+    if len(gauss) != nominal_steps // 20 + 1 or len(energy) != len(gauss):
+        raise ValueError("bulk energy or Gauss-law history has the wrong length")
+    for index, (gauss_row, energy_row) in enumerate(zip(gauss, energy)):
+        time = 20 * index * float(dt)
+        energy_time = energy_row[1] if index else energy_row[0]
+        if energy_row[0] != 20 * index or not (
+            math.isclose(gauss_row[0], time, abs_tol=1e-7)
+            and math.isclose(energy_time, time, abs_tol=1e-7)
+        ):
+            raise ValueError(f"missing diagnostic sample at t={time:g}")
+        if not 0 <= gauss_row[2] <= gauss_row[1]:
+            raise ValueError(f"invalid Gauss-law residuals at t={time:g}")
+    return initial, gauss
 
 
 def validate_run(run_dir, job, manifest):
@@ -129,25 +156,7 @@ def validate_run(run_dir, job, manifest):
         "#Nx,Ny,Nz": " 64 64 512", "#ax,ay,az": " 2 2 0.5", "#dT": f" {dt}",
     })
 
-    profile_names = [f"EMTDynT{frame * 8 / 10:g}ID{seed}.txt" for frame in range(111)]
-    if {path.name for path in run_dir.glob("EMTDynT*")} != set(profile_names):
-        raise ValueError("expected all 111 EMT profiles at reported times 0, 0.8, ..., 88")
-    initial = check_z_rows(run_dir / profile_names[0], 14)
-    for name in profile_names[1:]:
-        check_z_rows(run_dir / name, 14)
-    check_z_rows(run_dir / f"GVDynT0ID{seed}.txt", 2)
-
-    gauss = read_numeric_rows(run_dir / f"GausCheck{seed}.txt", 3)
-    energy = read_numeric_rows(run_dir / f"EnergyID{seed}.txt", 4, initial_width=6)
-    if len(gauss) != nominal_steps // 20 + 1 or len(energy) != len(gauss):
-        raise ValueError("bulk energy or Gauss-law history has the wrong length")
-    for index, (gauss_row, energy_row) in enumerate(zip(gauss, energy)):
-        time = 20 * index * float(dt)
-        energy_time = energy_row[1] if index else energy_row[0]
-        if not math.isclose(gauss_row[0], time, abs_tol=1e-7) or not math.isclose(energy_time, time, abs_tol=1e-7):
-            raise ValueError(f"missing diagnostic sample at t={time:g}")
-        if not 0 <= gauss_row[2] <= gauss_row[1]:
-            raise ValueError(f"invalid Gauss-law residuals at t={time:g}")
+    initial, gauss = validate_diagnostics(run_dir, seed, dt, nominal_steps, profile_steps, 512)
 
     logging.info(
         "Validated %s | seed %s dT=%s %s | 111 profiles | %ss, %s KiB RSS | "

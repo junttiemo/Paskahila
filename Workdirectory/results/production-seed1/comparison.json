@@ -1,0 +1,56 @@
+{
+  "seed": 1,
+  "dT": 0.008,
+  "modes": [
+    "collision",
+    "left-only",
+    "right-only",
+    "induced"
+  ],
+  "components": [
+    "T00",
+    "T0Z",
+    "P_T",
+    "P_L"
+  ],
+  "grid": {
+    "production": {
+      "crossing_t_z": [
+        19.125,
+        127.625
+      ],
+      "dimensions": [
+        128,
+        128,
+        1024
+      ],
+      "spacings": [
+        1,
+        1,
+        0.25
+      ]
+    },
+    "Grid B": {
+      "crossing_t_z": [
+        19.25,
+        127.25
+      ],
+      "dimensions": [
+        64,
+        64,
+        512
+      ],
+      "spacings": [
+        2,
+        2,
+        0.5
+      ]
+    }
+  },
+  "common_z_bins": 511,
+  "matched_evolved_times": 109,
+  "evolved_time_coordinate": "s = t_reported + dT/2 - t_crossing",
+  "space_coordinate": "zeta = z_index * az - z_crossing; overlap weights use cell edges",
+  "near_zero_rule": "RMS(Grid B) <= max(1e-30, 1e-12 * peak RMS for this mode and component)",
+  "interpretation": "The comparison combines mesh and transverse charge realization effects for these events."
+}

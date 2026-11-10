@@ -12,7 +12,7 @@ The goal is a collision discretization and resolution-sensitivity demonstration 
 | [Collision plan with 4 to 1 spacing](plan-collision-spacing-4-to-1.md) | Corrected base series: 32 × 32 × 256 and 64 × 64 × 512 at dT = 0.08; Grid B ensemble follow-up is listed separately |
 | [Grid B timestep and induced-EMT ensemble plan](plan-collision-spacing-4-to-1-grid-b-ensemble.md) | Completed 48-run Grid B study with eight seeds, dT = 0.08 and 0.008, and matched single-nucleus controls |
 | [Roihu and seed 1 production handoff](ROIHU_REPRODUCTION.md#seed-1-production-handoff) | Historical solver comparison through the full-grid compatibility pilot |
-| [Production lattice plan for seed 1](plan-production-seed1.md) | Optimized `128 × 128 × 1024` triple at `dT=0.008` through `t=88`, with a planned unattended queue and Grid B comparison |
+| [Production lattice plan for seed 1](plan-production-seed1.md) | Completed `128 × 128 × 1024` triple at `dT=0.008` through `t=88` and [Grid B comparison](PRODUCTION_SEED1_HANDOFF.md) |
 | [Single nucleus reference](plan-single-nucleus-reference.md) | Supporting diagnostics and historical study outline; not a required standalone campaign |
 
 The ratio in each collision filename is a_perp:a_z. Both series keep the physical box (128, 128, 256). Do not add a 128 × 128 × 1024 run to the friend's series. Keep each series' time-step check distinct.
