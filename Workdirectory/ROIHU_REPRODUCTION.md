@@ -1,6 +1,6 @@
 # Roihu comparison and seed 1 handoff
 
-Historical comparison record from 5 November 2026. The follow-up uses the optimized EMT writer for a matched production-grid triple and its comparison with Grid B. [Production lattice plan](plan-production-seed1.md)
+Historical comparison record from 5 November 2026. The follow-up completed a matched production-grid triple and its comparison with Grid B using the optimized EMT writer. [Production seed 1 results](PRODUCTION_SEED1_HANDOFF.md)
 
 A fresh build of `a9e81dc` served as the historical reference. The original Roihu output is unavailable. The seed-0 `timetest008Coll` and `timetest008Coll2` archives first appeared at `853d302` and provide a separate check at the historical transverse resolution.
 
@@ -105,4 +105,4 @@ Compare the fork runs in simulation units. Convert the bulk site sum to integrat
 
 Report absolute differences alongside relative RMS on the aligned grid. The same seed labels different transverse charge realizations on the two meshes, and both transverse and longitudinal spacings change. Treat the result as a comparison of these two events that combines mesh and realization effects.
 
-The production campaign extends this collision comparison to the collision-minus-controls observable using left-only and right-only runs on each lattice. [Cross-grid comparison plan](plan-production-seed1.md#compare-the-two-lattices)
+The completed production campaign compares the collision-minus-controls observable using left-only and right-only runs on each lattice. [Cross-grid results](PRODUCTION_SEED1_HANDOFF.md#longitudinal-emt-profiles)

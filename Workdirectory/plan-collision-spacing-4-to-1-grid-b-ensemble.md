@@ -58,7 +58,7 @@ Repeat for seeds 1 through 8, then repeat the same triples with `COLLISION_DT=0.
 
 ### Unattended continuation for seeds 2–8
 
-The ensemble queue requires the archived seed-1 executable, its build record, and all six seed-1 run directories. It runs pending coarse triples followed by fine triples and checks each run's manifest, profile cadence, finite output, and diagnostic histories before advancing. It appends progress and Gauss-law peaks to `runs/grid-b-ensemble.log`. Restarting revalidates completed runs and creates a fresh directory for each pending run. [Ensemble queue](run-grid-b-ensemble.py)
+The ensemble queue requires the archived seed-1 executable, its build record, all six seed-1 run directories, and a checkout with the same committed `SourceCode` tree as `2feb0d6`. It runs pending coarse triples followed by fine triples and checks each run's manifest, profile cadence, finite output, and diagnostic histories before advancing. It appends progress and Gauss-law peaks to `runs/grid-b-ensemble.log`. Restarting revalidates completed runs and creates a fresh directory for each pending run. [Ensemble queue](run-grid-b-ensemble.py)
 
 To use the queue from Windows PowerShell, set the path to your `Workdirectory` as it appears inside WSL. Preview the queue before launching the background process.
 

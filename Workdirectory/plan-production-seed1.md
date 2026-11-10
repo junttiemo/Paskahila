@@ -1,6 +1,8 @@
 # Production lattice plan for seed 1
 
-Run a matched collision, left-only and right-only triple through nominal `t=88` on the `128 × 128 × 1024` lattice. Use the existing seed-1 `64 × 64 × 512` triple at `dT=0.008` as the baseline. The optimized EMT writer passed the performance pilot below. The queue and cross-grid analysis are specified for implementation as one unattended job.
+The production triple and comparison completed on 9 November 2026. The [results handoff](PRODUCTION_SEED1_HANDOFF.md) records the validated runs, cross-grid differences, and review files.
+
+Run a matched collision, left-only and right-only triple through nominal `t=88` on the `128 × 128 × 1024` lattice. Use the existing seed-1 `64 × 64 × 512` triple at `dT=0.008` as the baseline. The optimized EMT writer passed the performance pilot below. The [queue](run-production-seed1.py) runs all three modes and the [cross-grid analysis](analyze-production-seed1.py) in one unattended job.
 
 ## Run configuration
 
@@ -16,7 +18,7 @@ Run a matched collision, left-only and right-only triple through nominal `t=88` 
 
 Use the corrected SU(2) collision-study solver with `Qs=0.125`, `MEff=0.125` and `Lambda=0.625`, periodic x/y and open z. Run all three modes through `Simulation.cpp`. Set `-NucleusL/-NucleusR` to `(1,1)` for collision, `(1,0)` for left-only and `(0,1)` for right-only. Both source arrays are drawn in the same order in every mode, so the active nucleus in each control shares its realization with the collision on that mesh. [Grid B seed 1 handoff](GRID_B_SEED1_HANDOFF.md) · [Production pilot](ROIHU_REPRODUCTION.md#completed-full-grid-pilot)
 
-The archived Grid B executable at `build/CollSUNcSolver-4to1-main-t88` matches the Grid B manifests. Its source tree at `2feb0d629954280be377836d9d1359ce0c2e276e` also matches the pre-optimization production pilot. Build a separate production executable from a pinned revision containing the optimized EMT writer, using `COLLISION_STUDY_BUILD` and `COLLISION_STUDY_END_T=88`. Record the revision, compiler, command, binary hash and `ldd` output, and use that executable for all three modes. [Build recipe](build-collision-spacing-4-to-1.sh)
+The archived Grid B executable at `build/CollSUNcSolver-4to1-main-t88` matches the Grid B manifests. Its source tree at `2feb0d629954280be377836d9d1359ce0c2e276e` also matches the pre-optimization production pilot. The queue's `--prepare` command creates a separate Git snapshot from that tree and the validated EMT writer. It verifies the snapshot, builds with `COLLISION_STUDY_BUILD` and `COLLISION_STUDY_END_T=88`, and records the revision, compiler, command, binary hash and `ldd` output in `runs/production-seed1-dt0008/build/build.json`.
 
 ## Performance pilot
 
@@ -36,19 +38,24 @@ Both production-grid EMT frames matched to roundoff, with a maximum absolute dif
 
 The optimized 100-step block with EMT output took 239.3 seconds. Extrapolating the collision pilot to 110 blocks per mode gives **about 7h20m per mode, or 22 hours serially**. Reserve **24–30 hours** of host uptime for this estimate. Run one solver at a time with `OMP_NUM_THREADS=8`, `OMP_DYNAMIC=FALSE`, `LC_ALL=C` and GSL `mt19937` seeded via `-SEED 1`. Require at least 19 GiB available inside WSL before each mode and 1 GiB free on the output volume.
 
-1. Adapt the existing Grid B queue and validator for the production geometry. Give the proposed `run-production-seed1.py` a read-only `--dry-run` that checks the pinned build, dependencies, resources, analysis imports and the three exact Grid B inputs. Print the solver arguments and pending modes in order. [Grid B queue](run-grid-b-ensemble.py)
+1. Run `run-production-seed1.py --dry-run` to check the pinned build, dependencies, resources, analysis imports and the three exact Grid B inputs. The dry run prints the solver arguments and pending modes in order. [Grid B queue and shared validation](run-grid-b-ensemble.py)
 2. Have `--run` repeat the preflight under a campaign lock that the solver inherits. Run collision, left-only, then right-only. Create a fresh attempt directory under `runs/production-seed1-dt0008/` for each mode and capture the exact command, grid and source settings, revision, binary hash, start and finish times, exit status, actual endpoint, wall time, peak RSS and solver log. Write progress and the current attempt path to `campaign.log` as the queue advances.
 3. Validate each run before advancing. On a failure, record the check and attempt path and stop. Rerunning the same command revalidates and skips completed modes. It starts an interrupted mode at `t=0` in a fresh directory because the normal solver path has checkpoint writes disabled. After the third validation, run the comparison automatically and record its outcome separately so an analysis retry can reuse all three runs. [Restart behavior](GETTING_STARTED.md)
 4. Exercise the dry-run, duplicate-launch guard and resume behavior on a short test before the production launch. On launch day, keep Windows on AC and awake with Ubuntu running. Before leaving, confirm the background queue survives closing the launch terminal, reaches the first evolved profile at `t=0.8` and has memory headroom without active swapping.
 
-Once the queue is implemented, use the path to `Workdirectory` inside the default Ubuntu WSL distribution.
+Use the path to `Workdirectory` inside Ubuntu. The completed campaign ran the solver in WSL and used Windows Anaconda for NumPy and Matplotlib. Set the paths below for the local checkout and Python installation.
 
 ```powershell
 $productionPath = '/mnt/c/path/to/Paskahila/Workdirectory'
-wsl.exe --cd $productionPath --exec python3 -B run-production-seed1.py --dry-run
+$analysisPython = '/mnt/c/ProgramData/Anaconda3/python.exe'
+$env:Path = 'C:\ProgramData\Anaconda3\Library\bin;' + $env:Path
+
+wsl.exe --distribution Ubuntu --cd $productionPath --exec python3 -B run-production-seed1.py --prepare
+if ($LASTEXITCODE -ne 0) { throw 'Production build preparation failed.' }
+wsl.exe --distribution Ubuntu --cd $productionPath --exec python3 -B run-production-seed1.py --dry-run --analysis-python $analysisPython
 if ($LASTEXITCODE -ne 0) { throw 'Production queue preflight failed.' }
 Start-Process -FilePath wsl.exe -WindowStyle Hidden `
-  -ArgumentList '--cd', ('"{0}"' -f $productionPath), '--exec', 'python3', '-u', '-B', 'run-production-seed1.py', '--run'
+  -ArgumentList '--distribution', 'Ubuntu', '--cd', ('"{0}"' -f $productionPath), '--exec', 'python3', '-u', '-B', 'run-production-seed1.py', '--run', '--analysis-python', $analysisPython
 ```
 
 ## Completion checks

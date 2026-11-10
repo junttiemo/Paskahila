@@ -53,7 +53,7 @@ The subtraction is the study's operational collision-minus-isolated-controls obs
 
 ## Reproduction and continuation
 
-From `Workdirectory` in Ubuntu/WSL, build the executables from the current source before launching. Run a coarse matched triple with:
+For a reproduction of the Grid B pilot, build from the `2feb0d6` source tree with the collision-study flags. From `Workdirectory` in Ubuntu/WSL, run a coarse matched triple with the resulting executable.
 
 ```bash
 for mode in collision left-only right-only; do
